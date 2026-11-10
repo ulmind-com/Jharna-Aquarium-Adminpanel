@@ -155,7 +155,7 @@ export default function GardenServices() {
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Home page band</h3>
         <label>Heading</label>
-        <input value={section.title || ""} onChange={(e) => setS("title", e.target.value)} placeholder="Garden services by MyGarden" />
+        <input value={section.title || ""} onChange={(e) => setS("title", e.target.value)} placeholder="Garden services by Jharna Aquarium & Nursery" />
         <label>Body copy</label>
         <textarea rows={4} value={section.body || ""} onChange={(e) => setS("body", e.target.value)} />
         <label>Button label</label>
@@ -194,7 +194,7 @@ export default function GardenServices() {
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Why us + call-back form</h3>
         <label>“Why choose us” heading</label>
-        <input value={section.why_title || ""} onChange={(e) => setS("why_title", e.target.value)} placeholder="Why Choose MyGarden?" />
+        <input value={section.why_title || ""} onChange={(e) => setS("why_title", e.target.value)} placeholder="Why Choose Jharna Aquarium & Nursery?" />
         <label>Points — one per line</label>
         <textarea rows={4} value={lines("why_points")} onChange={(e) => setLines("why_points", e.target.value)} />
         <div className="row">
@@ -241,7 +241,7 @@ export default function GardenServices() {
           Supports <code>## Heading</code>, <code>### Sub-heading</code>, <code>- bullet</code> and <code>**bold**</code>. Leave a blank line between paragraphs.
         </p>
         <label>“More about” heading</label>
-        <input value={section.about_title || ""} onChange={(e) => setS("about_title", e.target.value)} placeholder="More About MyGarden Garden Services" />
+        <input value={section.about_title || ""} onChange={(e) => setS("about_title", e.target.value)} placeholder="More About Jharna Aquarium & Nursery Garden Services" />
         <label>“More about” body</label>
         <textarea rows={8} value={section.about_body || ""} onChange={(e) => setS("about_body", e.target.value)} />
         <label>SEO / services detail block (bottom of the page)</label>

@@ -12,8 +12,8 @@ export default function Layout() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-icon">🌿</span>
-          Nursery<span>Admin</span>
+          <span className="brand-icon"><img src="/jharna-logo.png" alt="Jharna Aquarium & Nursery" style={{ width: "100%", height: "100%", objectFit: "contain" }} /></span>
+          Jharna<span>Aquarium</span>
         </div>
         <nav className="nav">
           {SECTIONS.filter((s) => hasSection(s.key)).map((s) => (
@@ -38,7 +38,7 @@ export default function Layout() {
           color: 'rgba(255,255,255,0.4)',
           textAlign: 'center'
         }}>
-          🌱 MyGarden Admin v1.0
+          🌱 Jharna Aquarium & Nursery Admin v1.0
         </div>
       </aside>
       <div className="main">

@@ -31,8 +31,8 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-brand">
-          <span className="login-brand-icon">🌿</span>
-          <h1>Nursery Admin</h1>
+          <span className="login-brand-icon"><img src="/jharna-logo.png" alt="Jharna Aquarium & Nursery" style={{ width: "100%", height: "100%", objectFit: "contain" }} /></span>
+          <h1>Jharna Aquarium &amp; Nursery</h1>
           <p>Plant management dashboard</p>
         </div>
 
@@ -66,7 +66,7 @@ export default function Login() {
         </form>
 
         <div className="login-footer">
-          🌱 MyGarden Admin Panel • Powered by FastAPI
+          🌱 Jharna Aquarium & Nursery Admin Panel • Powered by FastAPI
         </div>
       </div>
     </div>

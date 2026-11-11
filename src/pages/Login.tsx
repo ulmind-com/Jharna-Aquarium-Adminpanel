@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { setAuth } from "../auth";
+import * as passkey from "../passkey";
 import "./Login.css";
 
 export default function Login() {
@@ -10,6 +11,26 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pkLoading, setPkLoading] = useState(false);
+  const canPasskey = passkey.isSupported();
+
+  const passkeyLogin = async () => {
+    setErr("");
+    setPkLoading(true);
+    try {
+      const res = await passkey.authenticate();
+      if (res.user?.role !== "admin") throw new Error("Not an admin account");
+      setAuth(res.access_token, res.user);
+      nav("/");
+    } catch (e: any) {
+      // The user cancelling the OS prompt throws NotAllowedError — stay quiet.
+      if (e?.name !== "NotAllowedError" && e?.name !== "AbortError") {
+        setErr(e?.message || "Fingerprint sign-in failed.");
+      }
+    } finally {
+      setPkLoading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +85,21 @@ export default function Login() {
             {loading ? "Signing in…" : "Sign in to Dashboard"}
           </button>
         </form>
+
+        {canPasskey && (
+          <>
+            <div className="login-or"><span>or</span></div>
+            <button
+              type="button"
+              className="login-passkey-btn"
+              onClick={passkeyLogin}
+              disabled={pkLoading}
+            >
+              <span aria-hidden style={{ fontSize: 18 }}>🔑</span>
+              {pkLoading ? "Waiting for fingerprint…" : "Sign in with fingerprint"}
+            </button>
+          </>
+        )}
 
         <div className="login-footer">
           🌱 Jharna Aquarium & Nursery Admin Panel • Powered by FastAPI

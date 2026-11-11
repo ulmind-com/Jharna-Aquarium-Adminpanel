@@ -3,8 +3,115 @@ import { api } from "../api";
 import DeleteButton from "../components/DeleteButton";
 import { fmtDateTime } from "../date";
 import { ALL_SECTION_KEYS, SECTIONS } from "../sections";
+import * as passkey from "../passkey";
 
 const emptyForm = { name: "", email: "", password: "" };
+
+// Owner-only passkey (fingerprint / Face ID) manager. Add a passkey while
+// signed in with the password, then sign in with the biometric alone — no more
+// typing the password every time. Lives here because this page is already
+// super-admin-only (SuperGuard), so no extra gating is needed.
+function PasskeyCard() {
+  const [creds, setCreds] = useState<passkey.Credential[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [platformOk, setPlatformOk] = useState<boolean | null>(null);
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+
+  const supported = passkey.isSupported();
+
+  const load = () => {
+    passkey.listCredentials().then(setCreds).catch(() => setCreds([]));
+  };
+
+  useEffect(() => {
+    if (!supported) return;
+    load();
+    passkey.isPlatformAvailable().then(setPlatformOk).catch(() => setPlatformOk(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const add = async () => {
+    setErr(""); setMsg(""); setBusy(true);
+    try {
+      await passkey.register();
+      setMsg("Passkey added. You can now sign in with your fingerprint.");
+      load();
+    } catch (e: any) {
+      if (e?.name !== "NotAllowedError" && e?.name !== "AbortError") {
+        setErr(e?.message || "Could not set up fingerprint.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // onDelete does only the request (reject bounces the bin back); refreshing the
+  // list and the success note happen in onDone, once the animation has played.
+  const removeReq = async (id: string) => {
+    setErr(""); setMsg("");
+    try {
+      await passkey.removeCredential(id);
+    } catch (e: any) {
+      setErr(e?.message || "Could not remove passkey.");
+      throw e;
+    }
+  };
+
+  if (!supported) return null;
+
+  return (
+    <div className="card">
+      <h3 style={{ marginTop: 0 }}>Fingerprint sign-in (Face ID / passkey)</h3>
+      <p className="muted" style={{ marginTop: -4 }}>
+        Add a passkey on this device, then sign in with your fingerprint or Face ID
+        instead of typing your password every time. A passkey your device syncs
+        (same Google / Apple account) works on your other devices too. Owner only.
+      </p>
+
+      {platformOk === false && (
+        <div className="muted" style={{ marginBottom: 10 }}>
+          This device has no fingerprint / Face ID sensor, so you can't add one here.
+          Passkeys you added on other devices still work.
+        </div>
+      )}
+
+      <button className="btn" onClick={add} disabled={busy || platformOk === false}>
+        {busy ? "Waiting for fingerprint…" : "➕ Add this device"}
+      </button>
+
+      {err && <div className="err" style={{ marginTop: 10 }}>{err}</div>}
+      {msg && <div className="muted" style={{ color: "#10b981", marginTop: 10 }}>{msg}</div>}
+
+      <div style={{ marginTop: 14 }}>
+        {creds.length === 0 ? (
+          <div className="muted">No passkey yet. Tap “Add this device”, confirm with your fingerprint, and you're set.</div>
+        ) : (
+          <table>
+            <thead><tr><th>Device</th><th>Added</th><th>Last used</th><th></th></tr></thead>
+            <tbody>
+              {creds.map((c) => (
+                <tr key={c.id}>
+                  <td><b>{c.label || "Device"}</b></td>
+                  <td className="muted">{c.created_at ? fmtDateTime(c.created_at) : "—"}</td>
+                  <td className="muted">{c.last_used_at ? fmtDateTime(c.last_used_at) : "Never"}</td>
+                  <td>
+                    <DeleteButton
+                      label="Remove"
+                      confirm="Remove this passkey? You can add it again later."
+                      onDelete={() => removeReq(c.id)}
+                      onDone={() => { setMsg("Passkey removed."); load(); }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // Turn a raw "POST /products" style entry into something readable for the owner.
 function describe(a: any): string {
@@ -105,6 +212,8 @@ export default function Admins() {
         admin should reach — they won't see or be able to change anything else. You
         can update a member's access any time. Only you (the owner) can manage this.
       </p>
+
+      <PasskeyCard />
 
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Add a new admin</h3>

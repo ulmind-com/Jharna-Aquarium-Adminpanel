@@ -1,3 +1,4 @@
+import { Check, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -114,7 +115,7 @@ export default function Announcements() {
               return (
                 <span key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 40 }}>
                   {display}
-                  <span style={{ color: "var(--orange)" }}>✦</span>
+                  <Sparkles size={12} color="var(--orange)" aria-hidden="true" />
                 </span>
               );
             })}
@@ -181,7 +182,7 @@ export default function Announcements() {
         <button className="btn" onClick={save} disabled={saving}>
           {saving ? "Saving…" : "Save Changes"}
         </button>
-        {saved && <span style={{ color: "var(--green)", fontWeight: 600 }}>Saved ✓</span>}
+        {saved && <span className="inline-icon" style={{ color: "var(--green)", fontWeight: 600 }}><Check size={15} aria-hidden="true" /> Saved</span>}
       </div>
     </>
   );

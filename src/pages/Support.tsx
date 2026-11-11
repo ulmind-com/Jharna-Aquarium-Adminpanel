@@ -7,6 +7,7 @@
  * team can pick the conversation up cold. Delivering or cancelling the order
  * resolves its open ticket automatically.
  */
+import { Check, Leaf, Phone, Sprout } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { fmtDateTime } from "../date";
@@ -129,7 +130,9 @@ export default function Support() {
 
       {shown.length === 0 && (
         <div className="sup-card sup-empty">
-          <div style={{ fontSize: 40, marginBottom: 10 }}>🌿</div>
+          <div style={{ marginBottom: 10, color: "#16a34a", display: "inline-flex" }}>
+            <Leaf size={36} strokeWidth={1.7} aria-hidden="true" />
+          </div>
           <p style={{ margin: 0, fontWeight: 600 }}>
             {tab === "open" ? "No one is waiting on a reply right now." : "Nothing resolved yet."}
           </p>
@@ -158,7 +161,12 @@ export default function Support() {
                     #{t.order_short} · {(t.order_status || "").replace(/_/g, " ")}
                   </span>
                 )}
-                {t.product_title && !t.order_short && <span className="sup-chip muted">🪴 {t.product_title}</span>}
+                {t.product_title && !t.order_short && (
+                  <span className="sup-chip muted inline-icon">
+                    <Sprout size={13} aria-hidden="true" />
+                    <span>{t.product_title}</span>
+                  </span>
+                )}
                 {t.order_total != null && <span className="sup-chip muted">₹{t.order_total}</span>}
               </div>
             </div>
@@ -193,8 +201,9 @@ export default function Support() {
 
             <div className="sup-actions">
               {t.user_phone && (
-                <a className="sup-btn primary" href={`tel:${t.user_phone}`} style={{ textDecoration: "none", display: "inline-block" }}>
-                  📞 Call back
+                <a className="sup-btn primary" href={`tel:${t.user_phone}`} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Phone size={13} aria-hidden="true" />
+                  <span>Call back</span>
                 </a>
               )}
               {t.user_phone && (
@@ -224,8 +233,9 @@ export default function Support() {
                 </button>
               )}
               {t.status === "open" ? (
-                <button className="sup-btn primary" disabled={busy} onClick={() => setStatus(t.id, "closed")}>
-                  ✓ Mark resolved
+                <button className="sup-btn primary" style={{ display: "inline-flex", alignItems: "center", gap: 6 }} disabled={busy} onClick={() => setStatus(t.id, "closed")}>
+                  <Check size={14} aria-hidden="true" />
+                  <span>Mark resolved</span>
                 </button>
               ) : (
                 <button className="sup-btn ghost" disabled={busy} onClick={() => setStatus(t.id, "open")}>

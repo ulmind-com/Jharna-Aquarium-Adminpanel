@@ -1,3 +1,4 @@
+import { Sprout } from "lucide-react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { hasSection, isAdmin, isSuper } from "./auth";
 import { SECTIONS } from "./sections";
@@ -44,7 +45,10 @@ const firstAllowedPath = (): string | null => {
 function NoAccess() {
   return (
     <div style={{ padding: 40, textAlign: "center" }}>
-      <h2>🌿 No sections assigned</h2>
+      <h2 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+        <Sprout size={22} aria-hidden="true" />
+        <span>No sections assigned</span>
+      </h2>
       <p className="muted">Your account doesn't have access to any section yet. Please ask the store owner to grant you access.</p>
     </div>
   );

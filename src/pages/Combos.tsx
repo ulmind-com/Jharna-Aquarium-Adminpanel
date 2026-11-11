@@ -1,3 +1,4 @@
+import { AlertTriangle, Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -229,13 +230,21 @@ export default function Combos() {
               Select exactly {Number(f.qty) || 0} to make a <b>fixed bundle</b> (everything included, nothing to pick) —
               select more to let customers <b>mix &amp; match</b> any {Number(f.qty) || 0} from your selection.
             </p>
-            <p style={{
+            <p className="inline-icon" style={{
               marginTop: 4, marginBottom: 12, fontSize: 13, fontWeight: 700,
               color: f.product_ids.length >= (Number(f.qty) || 0) ? "#16a34a" : "#dc2626",
             }}>
-              {f.product_ids.length >= (Number(f.qty) || 0)
-                ? `✓ ${f.product_ids.length} selected — customers will pick any ${Number(f.qty) || 0}${f.product_ids.length === (Number(f.qty) || 0) ? " (fixed bundle)" : ""}`
-                : `⚠ Select at least ${Number(f.qty) || 0} (currently ${f.product_ids.length}) — this combo can't trigger yet`}
+              {f.product_ids.length >= (Number(f.qty) || 0) ? (
+                <>
+                  <Check size={15} aria-hidden="true" />
+                  <span>{f.product_ids.length} selected — customers will pick any {Number(f.qty) || 0}{f.product_ids.length === (Number(f.qty) || 0) ? " (fixed bundle)" : ""}</span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle size={15} aria-hidden="true" />
+                  <span>Select at least {Number(f.qty) || 0} (currently {f.product_ids.length}) — this combo can't trigger yet</span>
+                </>
+              )}
             </p>
 
             <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
@@ -361,7 +370,7 @@ export default function Combos() {
                     <span>{c.product_ids?.length || 0} specific items</span>
                   )}
                 </td>
-                <td><button className="btn ghost sm" onClick={() => toggle(c)}>{c.active ? "Active ✓" : "Inactive"}</button></td>
+                <td><button className="btn ghost sm" onClick={() => toggle(c)}>{c.active ? <><Check size={13} aria-hidden="true" /> Active</> : "Inactive"}</button></td>
                 <td className="flex">
                   <button className="btn ghost sm" onClick={() => edit(c)}>Edit</button>
                   <DeleteButton confirm={`Delete combo ${c.name}?`} onDelete={() => del(c.id)} onDone={() => afterDel(c.id)} />

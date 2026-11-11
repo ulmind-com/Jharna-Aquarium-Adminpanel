@@ -1,3 +1,4 @@
+import { MessageCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { fmtDate } from "../date";
@@ -195,7 +196,8 @@ export default function Reviews() {
                   ) : (
                     <div style={{ marginTop: 8 }}>
                       <button className="btn ghost sm" style={{ padding: "0 8px", height: 28, fontSize: 13, background: "#f8fafc", border: "1px solid #e2e8f0" }} onClick={() => setReplyModal({ id: r.id, text: "" })}>
-                        💬 Reply to Customer
+                        <MessageCircle size={13} aria-hidden="true" />
+                        <span>Reply to Customer</span>
                       </button>
                     </div>
                   )}

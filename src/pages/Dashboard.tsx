@@ -1,3 +1,4 @@
+import { UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
@@ -163,7 +164,7 @@ export default function Dashboard() {
 
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Welcome back! 👋</h1>
+          <h1 className="dashboard-title">Welcome back</h1>
           <p className="dashboard-subtitle">Here is what's happening in your nursery today.</p>
         </div>
       </div>
@@ -226,7 +227,10 @@ export default function Dashboard() {
           <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Live</span>
         </div>
         <div>
-          <div className="stat-label">🟢 Online Now</div>
+          <div className="stat-label inline-icon">
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", display: "inline-block" }} aria-hidden="true" />
+            <span>Online Now</span>
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div className="stat-value" style={{ fontSize: 28 }}>{stats.onlineNow}</div>
             {stats.onlineNow > 0 && (
@@ -241,7 +245,10 @@ export default function Dashboard() {
           </div>
         </div>
         <div>
-          <div className="stat-label">🆕 New Signups Today</div>
+          <div className="stat-label inline-icon">
+            <UserPlus size={14} color="#16a34a" aria-hidden="true" />
+            <span>New Signups Today</span>
+          </div>
           <div className="stat-value" style={{ fontSize: 28 }}>{stats.newToday}</div>
         </div>
 

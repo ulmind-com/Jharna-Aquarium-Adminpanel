@@ -1,3 +1,4 @@
+import { Trophy, UserX, Users as UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { fmtDate, fmtDateTime as fmtDT } from "../date";
@@ -91,21 +92,21 @@ export default function Users() {
 
       <div style={{ display: "flex", gap: 8, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
         {[
-          { id: "all", label: "All Customers", icon: "📦" },
-          { id: "top_spenders", label: "Top Spenders", icon: "🏆" },
-          { id: "zero_orders", label: "Zero Orders", icon: "👻" },
-        ].map(t => (
+          { id: "all", label: "All Customers", icon: UsersIcon },
+          { id: "top_spenders", label: "Top Spenders", icon: Trophy },
+          { id: "zero_orders", label: "Zero Orders", icon: UserX },
+        ].map(({ id, label, icon: Icon }) => (
           <button 
-            key={t.id} 
+            key={id} 
             onClick={() => {
-              setQuickFilter(t.id as any);
-              if (t.id === "top_spenders") setSortBy("spent_desc");
-              if (t.id === "zero_orders") setSortBy("joined_desc");
+              setQuickFilter(id as any);
+              if (id === "top_spenders") setSortBy("spent_desc");
+              if (id === "zero_orders") setSortBy("joined_desc");
             }}
             style={{
-              background: quickFilter === t.id ? "#1e293b" : "#fff",
-              color: quickFilter === t.id ? "#fff" : "#475569",
-              border: `1px solid ${quickFilter === t.id ? "#1e293b" : "#cbd5e1"}`,
+              background: quickFilter === id ? "#1e293b" : "#fff",
+              color: quickFilter === id ? "#fff" : "#475569",
+              border: `1px solid ${quickFilter === id ? "#1e293b" : "#cbd5e1"}`,
               padding: "8px 16px",
               borderRadius: 20,
               fontSize: 14,
@@ -118,7 +119,8 @@ export default function Users() {
               transition: "all 0.2s"
             }}
           >
-            <span>{t.icon}</span> {t.label} 
+            <Icon size={15} aria-hidden="true" />
+            <span>{label}</span>
           </button>
         ))}
       </div>

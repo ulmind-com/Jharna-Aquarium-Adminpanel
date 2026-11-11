@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, uploadImage } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -123,7 +124,7 @@ export default function HomeBands() {
           <input type="checkbox" checked={gift.active !== false} onChange={(e) => setG("active", e.target.checked)} style={{ width: "auto", margin: 0 }} />
           Show this band on the home page
         </label>
-        {giftSaved && <div className="muted">Saved ✓</div>}
+        {giftSaved && <div className="muted inline-icon"><Check size={14} aria-hidden="true" /> Saved</div>}
         <button className="btn" style={{ marginTop: 14 }} onClick={saveGift}>Save gifting band</button>
       </div>
 
@@ -139,7 +140,7 @@ export default function HomeBands() {
           <input type="checkbox" checked={press.active !== false} onChange={(e) => setP("active", e.target.checked)} style={{ width: "auto", margin: 0 }} />
           Show this strip on the home page
         </label>
-        {pressSaved && <div className="muted">Saved ✓</div>}
+        {pressSaved && <div className="muted inline-icon"><Check size={14} aria-hidden="true" /> Saved</div>}
         <button className="btn ghost sm" style={{ marginTop: 12 }} onClick={savePress}>Save strip settings</button>
       </div>
 
@@ -168,7 +169,7 @@ export default function HomeBands() {
                 <tr key={logo.id} style={editId === logo.id ? { background: "#fff6f0" } : {}}>
                   <td><img src={logo.image} alt="" style={{ width: 110, height: 40, objectFit: "contain" }} /></td>
                   <td><b>{logo.name}</b>{logo.url && <div className="muted"><a href={logo.url} target="_blank" rel="noreferrer">Open ↗</a></div>}</td>
-                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/press/${logo.id}`, { active: !(logo.active !== false) }); loadPress(); }}>{logo.active !== false ? "Live ✓" : "Hidden"}</button></td>
+                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/press/${logo.id}`, { active: !(logo.active !== false) }); loadPress(); }}>{logo.active !== false ? <><Check size={13} aria-hidden="true" /> Live</> : "Hidden"}</button></td>
                   <td className="flex">
                     <button className="btn ghost sm" onClick={() => move(logo.id, -1)} disabled={i === 0}>↑</button>
                     <button className="btn ghost sm" onClick={() => move(logo.id, 1)} disabled={i === logos.length - 1}>↓</button>

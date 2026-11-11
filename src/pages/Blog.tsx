@@ -1,3 +1,4 @@
+import { PenLine, Star, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, uploadImage } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -134,7 +135,7 @@ export default function Blog() {
         <p className="muted">Loading stories…</p>
       ) : shown.length === 0 ? (
         <div className="card blog-empty">
-          <div className="blog-empty-mark">✎</div>
+          <div className="blog-empty-mark"><PenLine size={24} aria-hidden="true" /></div>
           <h3 style={{ margin: "12px 0 4px" }}>{items.length ? "No stories match that" : "No stories yet"}</h3>
           <p className="muted" style={{ marginTop: 0 }}>
             {items.length
@@ -150,7 +151,7 @@ export default function Blog() {
               <div className="blog-cover" onClick={() => setEditing(p)}>
                 {p.image ? <img src={p.image} alt="" /> : <span className="muted">No cover</span>}
                 <div className="blog-badges">
-                  {p.featured && <span className="blog-badge gold">★ Featured</span>}
+                  {p.featured && <span className="blog-badge gold inline-icon"><Star size={11} fill="currentColor" aria-hidden="true" /> Featured</span>}
                   <span className={`blog-badge${p.published ? " live" : ""}`}>
                     {p.published ? "Live" : "Draft"}
                   </span>
@@ -321,7 +322,7 @@ function Editor({ post, onClose, onSaved }: { post: Post; onClose: () => void; o
                     <div className="flex">
                       <button className="blog-icon" onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
                       <button className="blog-icon" onClick={() => move(i, 1)} disabled={i === blocks.length - 1}>↓</button>
-                      <button className="blog-icon danger" onClick={() => removeBlock(i)}>✕</button>
+                      <button className="blog-icon danger" onClick={() => removeBlock(i)} aria-label="Remove block"><X size={14} aria-hidden="true" /></button>
                     </div>
                   </div>
                   <textarea

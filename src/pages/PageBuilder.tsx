@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, uploadImage, uploadVideo } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -320,7 +321,7 @@ function SectionCard({
           <div className="flex" style={{ gap: 10, alignItems: "center", marginTop: 16 }}>
             <button className="btn" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save section"}</button>
             <button className="btn ghost" onClick={() => setDraft(section)} disabled={busy}>Undo changes</button>
-            {saved && <span className="muted">Saved ✓</span>}
+            {saved && <span className="muted inline-icon"><Check size={14} aria-hidden="true" /> Saved</span>}
           </div>
         </div>
       )}

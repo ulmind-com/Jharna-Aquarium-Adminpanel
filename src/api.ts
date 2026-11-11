@@ -1,19 +1,32 @@
 import { API_URL } from "./config";
 import { getToken, logout } from "./auth";
 
+const PUBLIC_AUTH_PATHS = new Set(["/auth/login"]);
+let sessionRedirecting = false;
+
 /** Force-logout on expired session: clear stored credentials, alert the admin,
  *  and redirect to the login page so they can sign back in immediately. */
 function handleSessionExpired() {
   logout();
+  if (sessionRedirecting || window.location.pathname === "/login") return;
+  sessionRedirecting = true;
   // Use alert() rather than a toast — admin must acknowledge before proceeding.
   alert("Your session has expired. Please log in again.");
   window.location.href = "/login";
 }
 
+function formatApiError(data: any, status: number): string {
+  const detail = data?.detail;
+  if (typeof detail === "string" && detail) return detail;
+  if (detail) return JSON.stringify(detail);
+  return `Error ${status}`;
+}
+
 async function req<T = any>(path: string, method = "GET", body?: any): Promise<T> {
+  const isPublicAuth = PUBLIC_AUTH_PATHS.has(path);
   const headers: Record<string, string> = {};
   if (body !== undefined) headers["Content-Type"] = "application/json";
-  const token = getToken();
+  const token = isPublicAuth ? null : getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, {
@@ -21,13 +34,18 @@ async function req<T = any>(path: string, method = "GET", body?: any): Promise<T
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (res.status === 401) {
+  if (res.status === 401 && !isPublicAuth) {
     handleSessionExpired();
     throw new Error("Session expired");
   }
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new Error(data?.detail ? JSON.stringify(data.detail) : `Error ${res.status}`);
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    /* non-JSON response body */
+  }
+  if (!res.ok) throw new Error(formatApiError(data, res.status));
   return data as T;
 }
 

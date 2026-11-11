@@ -1,3 +1,4 @@
+import { Check, LocateFixed, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, uploadImage } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -293,7 +294,7 @@ export default function Settings() {
 
       <div className="card">
         <div className="between"><h3 style={{ margin: 0 }}>Shop location</h3>
-          <button className="btn ghost sm" onClick={useMyLocation}>📍 Use my current location</button></div>
+          <button className="btn ghost sm" onClick={useMyLocation}><LocateFixed size={14} aria-hidden="true" /> Use my current location</button></div>
 
         <div className="row">
           <div style={{ flex: 2 }}><label>Shop name</label><input value={s.shop.name || ""} onChange={(e) => setShop("name", e.target.value)} /></div>
@@ -334,12 +335,13 @@ export default function Settings() {
                   onClick={() => selectPlace(p)}
                   style={{
                     padding: "10px 14px", cursor: "pointer", borderBottom: "1px solid #2a2a3a",
-                    fontSize: 13, color: "#ccc",
+                    fontSize: 13, color: "#ccc", display: "flex", alignItems: "center", gap: 8,
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "#2a2a3a")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  📍 {p.display_name}
+                  <MapPin size={14} style={{ flexShrink: 0 }} aria-hidden="true" />
+                  <span>{p.display_name}</span>
                 </div>
               ))}
             </div>
@@ -623,7 +625,7 @@ export default function Settings() {
       {err && <div className="err">{err}</div>}
       <div className="flex">
         <button className="btn" onClick={save}>Save settings</button>
-        {saved && <span style={{ color: "#2fae5f", fontWeight: 600 }}>Saved ✓</span>}
+        {saved && <span className="inline-icon" style={{ color: "#2fae5f", fontWeight: 600 }}><Check size={15} aria-hidden="true" /> Saved</span>}
       </div>
     </>
   );

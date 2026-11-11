@@ -1,3 +1,4 @@
+import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { api } from "../api";
 
@@ -15,7 +16,9 @@ function Copyable({ value }: { value?: string | null }) {
   return (
     <span className="mono">
       {value}
-      <button className="copy-btn" onClick={copy} title="Copy">{done ? "✓" : "⧉"}</button>
+      <button className="copy-btn" onClick={copy} title="Copy" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+        {done ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+      </button>
     </span>
   );
 }

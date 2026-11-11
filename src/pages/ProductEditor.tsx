@@ -1,6 +1,30 @@
+import {
+  Camera,
+  Check,
+  Eye,
+  Flame,
+  Flower2,
+  FolderPlus,
+  HeartPulse,
+  Image as ImageIcon,
+  IndianRupee,
+  Leaf,
+  Package,
+  PawPrint,
+  Plus,
+  Ruler,
+  Sparkles,
+  Sprout,
+  Star,
+  Tag,
+  Upload,
+  Wind,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, uploadImage } from "../api";
+import { resolveStorefrontAsset } from "../config";
 
 const emptySpec = {
   plant_type: "", sunlight: "", watering: "", difficulty_level: "",
@@ -27,14 +51,26 @@ const empty = {
   is_active: true, is_featured: false, is_bestseller: false, is_new_arrival: false,
 };
 
+const slugifyCat = (s: string) =>
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
 export default function ProductEditor() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const nav = useNavigate();
-  const [f, setF] = useState({ ...empty });
+  const prefillCategoryId = !id ? searchParams.get("category_id") || "" : "";
+  const [f, setF] = useState(() => ({ ...empty, category_id: prefillCategoryId }));
   const [cats, setCats] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [brandFocus, setBrandFocus] = useState(false);
   const [brandCreating, setBrandCreating] = useState(false);
+  const [quickCatOpen, setQuickCatOpen] = useState(false);
+  const [quickCatName, setQuickCatName] = useState("");
+  const [quickCatParent, setQuickCatParent] = useState("");
+  const [quickCatImg, setQuickCatImg] = useState("");
+  const [quickCatSaving, setQuickCatSaving] = useState(false);
+  const [quickCatUploading, setQuickCatUploading] = useState(false);
+  const [quickCatErr, setQuickCatErr] = useState("");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -57,6 +93,49 @@ export default function ProductEditor() {
       sizes: p.sizes || [],
     }));
   }, [id]);
+
+  useEffect(() => {
+    if (!id && prefillCategoryId) {
+      setF((prev) => ({ ...prev, category_id: prefillCategoryId }));
+    }
+  }, [id, prefillCategoryId]);
+
+  const selectedCat = cats.find((c) => c.id === f.category_id) || null;
+  const selectedParent = selectedCat?.parent_id
+    ? cats.find((c) => c.id === selectedCat.parent_id) || null
+    : null;
+
+  const createQuickCategory = async () => {
+    const cleanName = quickCatName.trim();
+    const baseSlug = slugifyCat(cleanName);
+    if (!cleanName || !baseSlug) {
+      setQuickCatErr("Enter a category name first");
+      return;
+    }
+    setQuickCatSaving(true);
+    setQuickCatErr("");
+    try {
+      const parentObj = quickCatParent ? cats.find((c) => c.id === quickCatParent) : null;
+      const slug = parentObj ? `${parentObj.slug}-${baseSlug}` : baseSlug;
+      const created = await api.post<any>("/categories", {
+        name: cleanName,
+        slug,
+        parent_id: quickCatParent || null,
+        image: quickCatImg || null,
+      });
+      const updatedCats = await api.get<any[]>("/categories");
+      setCats(updatedCats);
+      set("category_id", created.id);
+      setQuickCatOpen(false);
+      setQuickCatName("");
+      setQuickCatParent("");
+      setQuickCatImg("");
+    } catch (e: any) {
+      setQuickCatErr(e?.message || "Could not create category");
+    } finally {
+      setQuickCatSaving(false);
+    }
+  };
 
   // live price preview
   const base = f.discount_on === "mrp" ? f.mrp : f.price;
@@ -141,13 +220,28 @@ export default function ProductEditor() {
 
   return (
     <>
-      <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-        <span className="emoji">🌿</span> {id ? "Edit Plant" : "Add New Plant"}
-      </h1>
+      <div className="between" style={{ marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+        <h1 className="inline-icon" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", margin: 0 }}>
+          <Leaf size={24} color="var(--primary)" aria-hidden="true" />
+          <span>{id ? "Edit Plant" : "Add New Plant"}</span>
+        </h1>
+        {selectedCat && (
+          <span className="pill green" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px" }}>
+            <FolderPlus size={14} aria-hidden="true" />
+            <span>
+              Category: {selectedParent ? `${selectedParent.name} / ` : ""}
+              {selectedCat.name}
+            </span>
+          </span>
+        )}
+      </div>
 
       {/* Basic Info */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>🏷️ Basic Information</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <Tag size={17} aria-hidden="true" />
+          <span>Basic Information</span>
+        </h3>
         <label>Plant Name *</label>
         <input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Peace Lily (Spathiphyllum)" />
         <label>Description</label>
@@ -195,7 +289,18 @@ export default function ProductEditor() {
             )}
           </div>
           <div>
-            <label>Category</label>
+            <div className="between" style={{ marginBottom: 6 }}>
+              <label style={{ margin: 0 }}>Category</label>
+              <button
+                type="button"
+                className="btn ghost sm"
+                style={{ padding: "4px 10px", fontSize: 12 }}
+                onClick={() => { setQuickCatErr(""); setQuickCatOpen((o) => !o); }}
+              >
+                <FolderPlus size={13} aria-hidden="true" />
+                <span>{quickCatOpen ? "Close" : "+ New Category"}</span>
+              </button>
+            </div>
             <select value={f.category_id} onChange={(e) => set("category_id", e.target.value)}>
               <option value="">— none —</option>
               {/* Top-level categories first, each followed by its sub-categories */}
@@ -211,6 +316,147 @@ export default function ProductEditor() {
                 );
               })}
             </select>
+
+            {selectedCat && (
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: "8px 12px",
+                  borderRadius: 12,
+                  border: "1px solid #d1fae5",
+                  background: "#f4fbf6",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 10,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                  {selectedCat.image ? (
+                    <img
+                      src={resolveStorefrontAsset(selectedCat.image)}
+                      alt={selectedCat.name}
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "50%",
+                        objectFit: "contain",
+                        background: "#fff",
+                        border: "1px solid #bbf7d0",
+                        padding: 3,
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "50%",
+                        background: "#e7f5ec",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <ImageIcon size={16} color="#15803d" aria-hidden="true" />
+                    </span>
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#14532d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {selectedParent ? `${selectedParent.name} -> ` : ""}
+                      {selectedCat.name}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "#166534" }}>
+                      Storefront: /category/{selectedCat.slug}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn ghost sm"
+                  title="Clear category"
+                  style={{ padding: "4px 8px" }}
+                  onClick={() => set("category_id", "")}
+                >
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+
+            {quickCatOpen && (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: 12,
+                  borderRadius: 12,
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                }}
+              >
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>
+                  Quick-Create Category (stays on this product form)
+                </div>
+                <div className="row" style={{ gap: 8 }}>
+                  <div>
+                    <input
+                      value={quickCatName}
+                      onChange={(e) => setQuickCatName(e.target.value)}
+                      placeholder="Category name (e.g. Aquatic Plants)"
+                    />
+                  </div>
+                  <div>
+                    <select value={quickCatParent} onChange={(e) => setQuickCatParent(e.target.value)}>
+                      <option value="">Top-level Category</option>
+                      {cats
+                        .filter((c) => !c.parent_id && (c.order ?? 0) < 90)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            Inside {c.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+                {quickCatErr && (
+                  <div style={{ color: "#dc2626", fontSize: 12, marginTop: 6 }}>{quickCatErr}</div>
+                )}
+                <div className="flex" style={{ marginTop: 10, gap: 8, alignItems: "center" }}>
+                  <label className="btn ghost sm" style={{ cursor: "pointer" }}>
+                    <Upload size={13} aria-hidden="true" />
+                    <span>{quickCatUploading ? "Uploading..." : quickCatImg ? "Photo Ready" : "Photo (optional)"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setQuickCatUploading(true);
+                        setQuickCatErr("");
+                        try {
+                          setQuickCatImg(await uploadImage(file));
+                        } catch (upErr: any) {
+                          setQuickCatErr(upErr?.message || "Upload failed");
+                        } finally {
+                          setQuickCatUploading(false);
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="btn sm"
+                    disabled={quickCatSaving || quickCatUploading}
+                    onClick={createQuickCategory}
+                  >
+                    <Check size={13} aria-hidden="true" />
+                    <span>{quickCatSaving ? "Creating..." : "Create & Select"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/* Extra shelves — a plant keeps its category above and still shows on
@@ -252,7 +498,10 @@ export default function ProductEditor() {
 
       {/* Plant Specifications */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>🌱 Plant Specifications</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <Sprout size={17} aria-hidden="true" />
+          <span>Plant Specifications</span>
+        </h3>
         <div className="row">
           <div>
             <label>Plant Type</label>
@@ -293,9 +542,9 @@ export default function ProductEditor() {
             <label>Difficulty Level</label>
             <select value={sp.difficulty_level} onChange={(e) => setSpec("difficulty_level", e.target.value)}>
               <option value="">— select —</option>
-              <option value="Easy">🟢 Easy (Beginner)</option>
-              <option value="Medium">🟡 Medium (Intermediate)</option>
-              <option value="Hard">🔴 Hard (Expert)</option>
+              <option value="Easy">Easy (Beginner)</option>
+              <option value="Medium">Medium (Intermediate)</option>
+              <option value="Hard">Hard (Expert)</option>
             </select>
           </div>
           <div>
@@ -360,15 +609,16 @@ export default function ProductEditor() {
         {/* Plant tags / badges */}
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 18, padding: "14px 0", borderTop: "1px solid var(--border)" }}>
           {([
-            ["pet_safe", "🐾 Pet Safe"],
-            ["air_purifying", "💨 Air Purifying"],
-            ["medicinal", "💊 Medicinal"],
-            ["flowering", "🌸 Flowering"],
-            ["fragrant", "🌺 Fragrant"],
-          ] as const).map(([key, label]) => (
+            ["pet_safe", "Pet Safe", PawPrint],
+            ["air_purifying", "Air Purifying", Wind],
+            ["medicinal", "Medicinal", HeartPulse],
+            ["flowering", "Flowering", Flower2],
+            ["fragrant", "Fragrant", Sparkles],
+          ] as const).map(([key, label, Icon]) => (
             <label key={key} className="flex" style={{ cursor: "pointer", background: sp[key] ? "var(--primary-50)" : "#f8fafc", border: `1.5px solid ${sp[key] ? "var(--primary)" : "var(--border)"}`, padding: "8px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600, transition: "all 0.2s ease" }}>
               <input type="checkbox" style={{ width: "auto" }} checked={!!sp[key]} onChange={(e) => setSpec(key, e.target.checked)} />
-              {label}
+              <Icon size={14} aria-hidden="true" />
+              <span>{label}</span>
             </label>
           ))}
         </div>
@@ -382,7 +632,10 @@ export default function ProductEditor() {
 
       {/* Pricing */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>💰 Pricing</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <IndianRupee size={17} aria-hidden="true" />
+          <span>Pricing</span>
+        </h3>
         <div className="row">
           <div><label>MRP (struck through)</label><input type="number" value={f.mrp} onChange={(e) => set("mrp", e.target.value)} /></div>
           <div><label>Selling Price *</label><input type="number" value={f.price} onChange={(e) => set("price", e.target.value)} /></div>
@@ -412,7 +665,10 @@ export default function ProductEditor() {
 
       {/* Gallery */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>📸 Gallery Images</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <Camera size={17} aria-hidden="true" />
+          <span>Gallery Images</span>
+        </h3>
         <div className="imgs">
           {f.images.map((u, i) => (
             <div className="imgbox" key={u + i}>
@@ -429,7 +685,10 @@ export default function ProductEditor() {
       {/* Size Variants */}
       <div className="card">
         <div className="between">
-          <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>📏 Size & Pot Variants</h3>
+          <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+            <Ruler size={17} aria-hidden="true" />
+            <span>Size &amp; Pot Variants</span>
+          </h3>
           <button type="button" className="btn sm" onClick={addSize}>+ Add Size</button>
         </div>
         <p className="muted" style={{ marginTop: -4 }}>
@@ -488,7 +747,7 @@ export default function ProductEditor() {
                         </label>
                       </div>
                     </td>
-                    <td><button type="button" className="btn danger sm" onClick={() => rmSize(si)}>✕</button></td>
+                    <td><button type="button" className="btn danger sm" onClick={() => rmSize(si)} aria-label="Remove size"><X size={13} aria-hidden="true" /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -499,7 +758,10 @@ export default function ProductEditor() {
 
       {/* Care & Includes */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>🌿 Care & What's Included</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <Leaf size={17} aria-hidden="true" />
+          <span>Care &amp; What's Included</span>
+        </h3>
         <label>Care Instructions</label>
         <textarea rows={3} value={f.care_instructions} onChange={(e) => set("care_instructions", e.target.value)} placeholder="Detailed care paragraph for this plant..." />
 
@@ -510,14 +772,14 @@ export default function ProductEditor() {
         {f.care_tips.map((tip, i) => (
           <div className="flex" key={i} style={{ marginTop: 6 }}>
             <input value={tip} onChange={(e) => updTip(i, e.target.value)} placeholder="e.g. Water when topsoil feels dry" style={{ flex: 1 }} />
-            <button className="btn danger sm" onClick={() => rmTip(i)}>✕</button>
+            <button className="btn danger sm" onClick={() => rmTip(i)} aria-label="Remove tip"><X size={13} aria-hidden="true" /></button>
           </div>
         ))}
 
         <label style={{ marginTop: 16 }}>What's Included</label>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
           {defaultIncludes.map((item) => (
-            <button key={item} type="button"
+            <button key={item} type="button" className="inline-icon"
               style={{
                 padding: "8px 16px", borderRadius: 10, border: `1.5px solid ${f.includes.includes(item) ? "var(--primary)" : "var(--border)"}`,
                 background: f.includes.includes(item) ? "var(--primary-50)" : "#fff",
@@ -525,7 +787,8 @@ export default function ProductEditor() {
                 fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease",
               }}
               onClick={() => toggleInclude(item)}>
-              {f.includes.includes(item) ? "✓" : "+"} {item}
+              {f.includes.includes(item) ? <Check size={14} aria-hidden="true" /> : <Plus size={14} aria-hidden="true" />}
+              <span>{item}</span>
             </button>
           ))}
         </div>
@@ -536,7 +799,10 @@ export default function ProductEditor() {
 
       {/* Inventory */}
       <div className="card">
-        <h3 style={{ marginTop: 0, color: "var(--primary-dark)" }}>📦 Inventory & Details</h3>
+        <h3 className="inline-icon" style={{ marginTop: 0, color: "var(--primary-dark)" }}>
+          <Package size={17} aria-hidden="true" />
+          <span>Inventory &amp; Details</span>
+        </h3>
         <div className="row">
           <div><label>Base Stock (no variants)</label><input type="number" value={f.stock} onChange={(e) => set("stock", e.target.value)} /></div>
           <div><label>Low-stock alert at</label><input type="number" value={f.low_stock_threshold} onChange={(e) => set("low_stock_threshold", e.target.value)} /></div>
@@ -548,11 +814,11 @@ export default function ProductEditor() {
 
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 20, padding: "16px 0", borderTop: "1px solid var(--border)" }}>
           {([
-            ["is_active", "👁️ Visible in Store"],
-            ["is_featured", "⭐ Featured"],
-            ["is_bestseller", "🔥 Bestseller"],
-            ["is_new_arrival", "🆕 New Arrival"],
-          ] as const).map(([key, label]) => (
+            ["is_active", "Visible in Store", Eye],
+            ["is_featured", "Featured", Star],
+            ["is_bestseller", "Bestseller", Flame],
+            ["is_new_arrival", "New Arrival", Sparkles],
+          ] as const).map(([key, label, Icon]) => (
             <label key={key} className="flex" style={{
               cursor: "pointer",
               background: (f as any)[key] ? "var(--primary-50)" : "#f8fafc",
@@ -561,7 +827,8 @@ export default function ProductEditor() {
               transition: "all 0.2s ease",
             }}>
               <input type="checkbox" style={{ width: "auto" }} checked={(f as any)[key]} onChange={(e) => set(key, e.target.checked)} />
-              {label}
+              <Icon size={14} aria-hidden="true" />
+              <span>{label}</span>
             </label>
           ))}
         </div>
@@ -569,7 +836,14 @@ export default function ProductEditor() {
 
       {err && <div className="err">{err}</div>}
       <div className="flex" style={{ marginTop: 12, marginBottom: 40 }}>
-        <button className="btn" onClick={save} disabled={saving}>{saving ? "Saving…" : "🌿 Save Plant"}</button>
+        <button className="btn" onClick={save} disabled={saving}>
+          {saving ? "Saving…" : (
+            <>
+              <Leaf size={15} aria-hidden="true" />
+              <span>Save Plant</span>
+            </>
+          )}
+        </button>
         <button className="btn ghost" onClick={() => nav("/products")}>Cancel</button>
       </div>
     </>

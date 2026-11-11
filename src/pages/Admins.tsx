@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
 import { api } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -77,7 +78,12 @@ function PasskeyCard() {
       )}
 
       <button className="btn" onClick={add} disabled={busy || platformOk === false}>
-        {busy ? "Waiting for fingerprint…" : "➕ Add this device"}
+        {busy ? "Waiting for fingerprint…" : (
+          <>
+            <Plus size={15} aria-hidden="true" />
+            <span>Add this device</span>
+          </>
+        )}
       </button>
 
       {err && <div className="err" style={{ marginTop: 10 }}>{err}</div>}

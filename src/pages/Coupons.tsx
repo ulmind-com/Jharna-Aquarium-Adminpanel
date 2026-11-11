@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { fmtDate } from "../date";
@@ -115,7 +116,7 @@ export default function Coupons() {
                   <div style={{ fontSize: 13 }}>Total: {c.used_count || 0} / {c.usage_limit || "∞"}</div>
                 </td>
                 <td className="muted">{c.valid_from ? fmtDate(c.valid_from) : "—"} → {c.valid_until ? fmtDate(c.valid_until) : "∞"}</td>
-                <td><button className="btn ghost sm" onClick={() => toggle(c)}>{c.active ? "Active ✓" : "Inactive"}</button></td>
+                <td><button className="btn ghost sm" onClick={() => toggle(c)}>{c.active ? <><Check size={13} aria-hidden="true" /> Active</> : "Inactive"}</button></td>
                 <td className="flex">
                   <button className="btn ghost sm" onClick={() => edit(c)}>Edit</button>
                   <DeleteButton confirm={`Delete coupon ${c.code}?`} onDelete={() => del(c.id)} onDone={() => afterDel(c.id)} />

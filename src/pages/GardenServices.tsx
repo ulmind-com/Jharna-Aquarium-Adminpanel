@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, uploadImage } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -249,7 +250,7 @@ export default function GardenServices() {
         <label>Contact note (highlighted box at the very bottom)</label>
         <textarea rows={3} value={section.contact_note || ""} onChange={(e) => setS("contact_note", e.target.value)} />
         {err && <div className="err">{err}</div>}
-        {saved && <div className="muted">Saved ✓</div>}
+        {saved && <div className="muted inline-icon"><Check size={14} aria-hidden="true" /> Saved</div>}
         <button className="btn" style={{ marginTop: 14 }} onClick={saveSection}>Save all page settings</button>
       </div>
 
@@ -282,7 +283,7 @@ export default function GardenServices() {
                 <tr key={s.id} style={editId === s.id ? { background: "#fff6f0" } : {}}>
                   <td>{s.image && <img src={s.image} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8 }} />}</td>
                   <td><b>{s.title}</b>{s.summary && <div className="muted">{s.summary}</div>}</td>
-                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/${s.id}`, { active: !(s.active !== false) }); load(); }}>{s.active !== false ? "Live ✓" : "Hidden"}</button></td>
+                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/${s.id}`, { active: !(s.active !== false) }); load(); }}>{s.active !== false ? <><Check size={13} aria-hidden="true" /> Live</> : "Hidden"}</button></td>
                   <td className="flex">
                     <button className="btn ghost sm" onClick={() => moveService(s.id, -1)} disabled={i === 0}>↑</button>
                     <button className="btn ghost sm" onClick={() => moveService(s.id, 1)} disabled={i === items.length - 1}>↓</button>
@@ -355,7 +356,7 @@ export default function GardenServices() {
                 <tr key={item.id} style={editBlockId === item.id ? { background: "#fff6f0" } : {}}>
                   <td>{item.image && <img src={item.image} alt="" style={{ width: 56, height: 40, objectFit: "contain", borderRadius: 6 }} />}</td>
                   <td><b>{item.title || "—"}</b>{item.body && <div className="muted">{item.body.slice(0, 120)}{item.body.length > 120 ? "…" : ""}</div>}{item.author && <div className="muted">— {item.author}</div>}</td>
-                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/blocks/${item.id}`, { active: !(item.active !== false) }); load(); }}>{item.active !== false ? "Live ✓" : "Hidden"}</button></td>
+                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/blocks/${item.id}`, { active: !(item.active !== false) }); load(); }}>{item.active !== false ? <><Check size={13} aria-hidden="true" /> Live</> : "Hidden"}</button></td>
                   <td className="flex">
                     <button className="btn ghost sm" onClick={() => moveBlock(item.kind, item.id, -1)} disabled={i === 0}>↑</button>
                     <button className="btn ghost sm" onClick={() => moveBlock(item.kind, item.id, 1)} disabled={i === currentBlocks.length - 1}>↓</button>
@@ -393,7 +394,7 @@ export default function GardenServices() {
                   <td><a href={`tel:${e.phone}`}>{e.phone}</a></td>
                   <td>{e.location || "—"}</td>
                   <td>{e.service || "—"}</td>
-                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/enquiries/${e.id}`, { handled: !e.handled }); loadEnquiries(); }}>{e.handled ? "Handled ✓" : "Mark handled"}</button></td>
+                  <td><button className="btn ghost sm" onClick={async () => { await api.patch(`/garden-services/enquiries/${e.id}`, { handled: !e.handled }); loadEnquiries(); }}>{e.handled ? <><Check size={13} aria-hidden="true" /> Handled</> : "Mark handled"}</button></td>
                   <td>
                     <DeleteButton
                       confirm={`Delete request from ${e.name}?`}

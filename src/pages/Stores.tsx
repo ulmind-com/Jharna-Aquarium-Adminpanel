@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, uploadImage } from "../api";
 import DeleteButton from "../components/DeleteButton";
@@ -180,7 +181,7 @@ export default function Stores() {
                       {(s.phone || s.hours) && <div className="muted">{[s.phone, s.hours].filter(Boolean).join(" · ")}</div>}
                     </td>
                     <td>{s.map_url ? <a href={s.map_url} target="_blank" rel="noreferrer">Open ↗</a> : <span className="muted">—</span>}</td>
-                    <td><button className="btn ghost sm" onClick={() => toggle(s)}>{s.active !== false ? "Live ✓" : "Hidden"}</button></td>
+                    <td><button className="btn ghost sm" onClick={() => toggle(s)}>{s.active !== false ? <><Check size={13} aria-hidden="true" /> Live</> : "Hidden"}</button></td>
                     <td className="flex">
                       <button className="btn ghost sm" onClick={() => moveStore(city, s.id, -1)} disabled={i === 0}>↑</button>
                       <button className="btn ghost sm" onClick={() => moveStore(city, s.id, 1)} disabled={i === rows.length - 1}>↓</button>

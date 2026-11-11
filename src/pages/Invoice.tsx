@@ -1,3 +1,4 @@
+import { Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../api";
@@ -192,9 +193,10 @@ export default function Invoice() {
       <div className="no-print" style={{ marginTop: 40, textAlign: "center" }}>
         <button 
           onClick={() => window.print()}
-          style={{ background: "#1e293b", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 6, fontSize: 16, cursor: "pointer", fontWeight: 600 }}
+          style={{ background: "#1e293b", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 6, fontSize: 16, cursor: "pointer", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8 }}
         >
-          🖨️ Print Document
+          <Printer size={18} aria-hidden="true" />
+          <span>Print Document</span>
         </button>
       </div>
     </div>

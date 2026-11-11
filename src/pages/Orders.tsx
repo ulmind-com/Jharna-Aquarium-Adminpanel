@@ -25,21 +25,21 @@ const buildOrderMessage = (o: any) => {
   const addr = [o.address?.house, o.address?.area, o.address?.city, o.address?.state, o.address?.pincode]
     .filter(Boolean).join(", ");
   const lines: string[] = [];
-  lines.push("🌿 *Jharna Aquarium & Nursery — Order Details*");
+  lines.push("*Jharna Aquarium & Nursery — Order Details*");
   lines.push("");
   lines.push(`*Order:* ${orderId}`);
   lines.push(`*Date:* ${fmtDate(o.created_at)}`);
   lines.push(`*Status:* ${label(o.status)}`);
   lines.push("");
-  lines.push("👤 *Customer*");
+  lines.push("*Customer*");
   lines.push(`Name: ${o.address?.name || "—"}`);
   lines.push(`Phone: ${o.address?.phone || "—"}`);
   lines.push("");
-  lines.push("📍 *Delivery Address*");
+  lines.push("*Delivery Address*");
   lines.push(addr || "—");
   if (o.distance_km != null) lines.push(`Distance: ${o.distance_km} km`);
   lines.push("");
-  lines.push(`🛒 *Items (${o.items?.length || 0})*`);
+  lines.push(`*Items (${o.items?.length || 0})*`);
   (o.items || []).forEach((it: any, i: number) => {
     const variant = [it.size_variant ?? it.color, it.pot_type ?? it.size].filter(Boolean).join(" · ");
     lines.push(`${i + 1}. ${it.title}${variant ? ` (${variant})` : ""}`);
@@ -49,7 +49,7 @@ const buildOrderMessage = (o: any) => {
     if (img) lines.push(`   Image: ${img}`);
   });
   lines.push("");
-  lines.push("💰 *Bill*");
+  lines.push("*Bill*");
   lines.push(`Subtotal: ₹${o.subtotal}`);
   lines.push(`Discount: ₹${o.discount}`);
   lines.push(`Delivery: ₹${o.delivery}`);

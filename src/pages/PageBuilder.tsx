@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, uploadImage, uploadVideo } from "../api";
 import DeleteButton from "../components/DeleteButton";
+import { resolveStorefrontAsset } from "../config";
 
 /* Every band on the storefront home page is a row here. The shape of each
    band's form comes from the API's own type catalogue, so a new section type
@@ -62,15 +63,17 @@ function MediaField({
     }
   };
 
+  const resolvedValue = resolveStorefrontAsset(value);
+
   return (
     <div style={{ marginBottom: 12 }}>
       <label>{label}</label>
       <div className="flex" style={{ alignItems: "center", gap: 14 }}>
-        {value ? (
+        {resolvedValue ? (
           kind === "video" ? (
-            <video src={value} muted playsInline style={thumb} />
+            <video src={resolvedValue} muted playsInline style={thumb} />
           ) : (
-            <img src={value} alt="" style={thumb} />
+            <img src={resolvedValue} alt="" style={thumb} />
           )
         ) : (
           <div style={{ ...thumb, border: "1px dashed #cbd5e1", display: "grid", placeItems: "center", color: "#94a3b8", fontSize: 11 }}>
